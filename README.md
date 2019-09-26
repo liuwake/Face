@@ -1,5 +1,6 @@
 # Face
 
+# Face Recognition
 ## 
 
 
@@ -9,3 +10,8 @@
 - 
 
 ## Platform
+
+----
+# Facial Details Synthesis
+## GitProj
+- https://github.com/apchenstu/Facial_Details_Synthesis s201
