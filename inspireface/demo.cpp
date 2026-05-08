@@ -92,11 +92,7 @@ int main(){
     rect.x = multipleFaceData.rects->x;
     rect.y = multipleFaceData.rects->y;
     cv::rectangle(img,rect,{255,0,0},1);
-    cv::imshow("t", img);
-    cv::waitKey(0);
-
-
-
+    cv::imwrite("output.jpg", img);
 
 // The memory must be freed at the end of the program
     ret = HFReleaseImageBitmap(image);
