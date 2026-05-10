@@ -1,0 +1,6 @@
+CompileFlags:
+  Add: [
+    "-I/kaggle/temp/InspireFace/cpp/inspireface/c_api",
+    "-I/usr/include/opencv4",
+    "-Wno-everything"
+  ]
