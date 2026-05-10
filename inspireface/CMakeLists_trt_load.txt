@@ -1,0 +1,59 @@
+cmake_minimum_required(VERSION 3.10)
+project(InspireFaceTRTDemo)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find OpenCV components
+# find_package(OpenCV REQUIRED COMPONENTS core imgproc imgcodecs)
+
+# Define paths
+set(INSPIRE_FACE_ROOT "/kaggle/temp/InspireFace")
+set(INSPIRE_FACE_BUILD_DIR "${INSPIRE_FACE_ROOT}/build/inspireface-linux-tensorrt-cudaV12540_ubuntu_none")
+set(INSPIRE_FACE_INCLUDE_DIR "${INSPIRE_FACE_BUILD_DIR}/InspireFace/include")
+set(INSPIRE_FACE_LIB_DIR "${INSPIRE_FACE_BUILD_DIR}/InspireFace/lib")
+set(TENSORRT_ROOT "/opt/tensorrt" CACHE PATH "Path to TensorRT installation")
+
+# Include directories
+include_directories(
+    "${INSPIRE_FACE_INCLUDE_DIR}"
+)
+
+# Link directories
+link_directories(${INSPIRE_FACE_LIB_DIR})
+
+# Find CUDA
+find_package(CUDA REQUIRED)
+include_directories(${CUDA_INCLUDE_DIRS})
+link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
+
+# Find TensorRT
+find_path(TENSORRT_INCLUDE_DIR NvInfer.h
+    HINTS ${TENSORRT_ROOT}
+    PATH_SUFFIXES include)
+
+find_library(TENSORRT_LIBRARY_INFER nvinfer
+    HINTS ${TENSORRT_ROOT}
+    PATH_SUFFIXES lib lib64)
+
+find_library(TENSORRT_LIBRARY_RUNTIME nvinfer_plugin
+    HINTS ${TENSORRT_ROOT}
+    PATH_SUFFIXES lib lib64)
+
+include_directories(${TENSORRT_INCLUDE_DIR})
+
+# Add trt executable
+add_executable(trt ../trt.cpp)
+
+# Define TensorRT macro
+target_compile_definitions(trt PRIVATE ISF_ENABLE_TENSORRT)
+
+# Link libraries
+target_link_libraries(trt
+    # ${OpenCV_LIBS} # 移除 OpenCV 链接
+    InspireFace
+    ${TENSORRT_LIBRARY_INFER}
+    ${TENSORRT_LIBRARY_RUNTIME}
+    cudart
+)
