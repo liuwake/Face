@@ -4,6 +4,7 @@ FROM nvidia/cuda:12.0.0-devel-ubuntu22.04
 ARG https_proxy
 ARG http_proxy
 ARG all_proxy
+ARG ALL_PROXY
 
 RUN apt-get update 
 
@@ -12,6 +13,7 @@ RUN apt-get install -y --no-install-recommends build-essential
 RUN apt-get install -y --no-install-recommends software-properties-common
 RUN apt-get install -y --no-install-recommends curl
 RUN apt-get install -y --no-install-recommends wget
+RUN apt-get install -y --no-install-recommends libopencv-dev
 
 # Install CMake
 RUN apt-get install -y --no-install-recommends
