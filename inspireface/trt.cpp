@@ -1,5 +1,3 @@
-//#include "include/inspireface.h"
-//#include "include/herror.h"
 #include <iostream>
 #include <inspireface.h>
 #include <opencv2/opencv.hpp>
