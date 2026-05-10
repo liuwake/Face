@@ -7,8 +7,8 @@
 
 int main(){
     HResult ret;
-    # TODO:
-    # HPath packPath = "/kaggle/input/Megatron_TRT"; // OK
+    // TODO
+    // # HPath packPath = "/kaggle/input/Megatron"; // OK
     HPath packPath = "/kaggle/input/Megatron_TRT"; // TRT NG
     std::cout << "[DEBUG] Attempting to Launch SDK..." << std::endl;
 // The resource file must be loaded before it can be used
