@@ -44,7 +44,7 @@ find_library(TENSORRT_LIBRARY_RUNTIME nvinfer_plugin
 include_directories(${TENSORRT_INCLUDE_DIR})
 
 # Add trt executable
-add_executable(trt ../trt.cpp)
+add_executable(trt ../trt_load.cpp)
 
 # Define TensorRT macro
 target_compile_definitions(trt PRIVATE ISF_ENABLE_TENSORRT)
