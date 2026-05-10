@@ -7,7 +7,10 @@
 
 int main(){
     HResult ret;
-    HPath packPath = "./Megatron_TRT"; // model path
+    # TODO:
+    # HPath packPath = "/kaggle/input/Megatron_TRT"; // OK
+    HPath packPath = "/kaggle/input/Megatron_TRT"; // TRT NG
+    std::cout << "[DEBUG] Attempting to Launch SDK..." << std::endl;
 // The resource file must be loaded before it can be used
     ret = HFLaunchInspireFace(packPath);
     if (ret != HSUCCEED) {
@@ -36,7 +39,7 @@ int main(){
 // Configure some detection parameters
     HFSessionSetTrackPreviewSize(session, detectPixelLevel);
     HFSessionSetFilterMinimumFacePixelSize(session, 4); // 设置最小检测人脸像素尺寸
-
+    std::cout << "Load a image" << std::endl;
 // Load a image
     HFImageBitmap image;
     HPath sourcePath = "selected_img";
@@ -53,7 +56,7 @@ int main(){
         HFLogPrint(HF_LOG_ERROR, "Create ImageStream error: %d", ret);
         return ret;
     }
-
+    std::cout << "HFExecuteFaceTrack" << std::endl;
 // Execute HF_FaceContextRunFaceTrack captures face information in an image
     HFMultipleFaceData multipleFaceData = {0};
     ret = HFExecuteFaceTrack(session, imageHandle, &multipleFaceData);
@@ -66,7 +69,6 @@ int main(){
     auto faceNum = multipleFaceData.detectedNum;
     HFLogPrint(HF_LOG_INFO, "Num of face: %d", faceNum);
 
-
 //    typedef struct HFMultipleFaceData {
 //        HInt32 detectedNum;        ///< Number of faces detected.
 //        PHFaceRect rects;          ///< Array of bounding rectangles for each face.
@@ -77,21 +79,30 @@ int main(){
 //        PHFFaceBasicToken tokens;  ///< Tokens associated with each face.
 //    } HFMultipleFaceData, *PHFMultipleFaceData;
 
-    std::cout<<multipleFaceData.rects->x<<std::endl;
-    std::cout<<multipleFaceData.rects->y<<std::endl;
-    std::cout<<multipleFaceData.rects->width<<std::endl;
-    std::cout<<multipleFaceData.rects->height<<std::endl;
-    std::cout<<multipleFaceData.angles.roll<<std::endl;
+    if (faceNum > 0) {
+        std::cout<<multipleFaceData.rects->x<<std::endl;
+        std::cout<<multipleFaceData.rects->y<<std::endl;
+        std::cout<<multipleFaceData.rects->width<<std::endl;
+        std::cout<<multipleFaceData.rects->height<<std::endl;
+        std::cout<<multipleFaceData.angles.roll<<std::endl;
 
-    cv::Mat img = cv::imread("selected_img");
-    cv::Rect rect;
-    rect.height = multipleFaceData.rects->height;
-    rect.width = multipleFaceData.rects->width;
-    rect.x = multipleFaceData.rects->x;
-    rect.y = multipleFaceData.rects->y;
-    cv::rectangle(img,rect,{255,0,0},1);
-    cv::imwrite("output.jpg", img);
-
+        cv::Mat img = cv::imread("selected_img");
+        if (!img.empty()) {
+            cv::Rect rect;
+            rect.height = multipleFaceData.rects->height;
+            rect.width = multipleFaceData.rects->width;
+            rect.x = multipleFaceData.rects->x;
+            rect.y = multipleFaceData.rects->y;
+            cv::rectangle(img,rect,{255,0,0},1);
+            cv::imwrite("output.jpg", img);
+            std::cout << "Output image written to output.jpg" << std::endl;
+        } else {
+            std::cerr << "Error: Could not read selected_img!" << std::endl;
+        }
+        std::cout << "98" << std::endl;
+    } else {
+        std::cout << "No faces detected!" << std::endl;
+    }
 // The memory must be freed at the end of the program
     ret = HFReleaseImageBitmap(image);
     if (ret != HSUCCEED) {
