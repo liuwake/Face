@@ -10,10 +10,11 @@ find_package(OpenCV REQUIRED COMPONENTS core imgproc imgcodecs)
 
 # Define paths
 set(INSPIRE_FACE_ROOT "/kaggle/temp/InspireFace")
-set(INSPIRE_FACE_BUILD_DIR "${INSPIRE_FACE_ROOT}/build/inspireface-linux-tensorrt-cuda12.2_ubuntu22.04")
+file(GLOB INSPIRE_FACE_BUILD_DIRS "${INSPIRE_FACE_ROOT}/build/inspireface-linux-tensorrt-*")
+list(GET INSPIRE_FACE_BUILD_DIRS 0 INSPIRE_FACE_BUILD_DIR)
 set(INSPIRE_FACE_INCLUDE_DIR "${INSPIRE_FACE_BUILD_DIR}/InspireFace/include")
 set(INSPIRE_FACE_LIB_DIR "${INSPIRE_FACE_BUILD_DIR}/InspireFace/lib")
-set(TENSORRT_ROOT "/TensorRT-10.8.0.43/" CACHE PATH "Path to TensorRT installation")
+set(TENSORRT_ROOT "$ENV{TENSORRT_ROOT}" CACHE PATH "Path to TensorRT installation")
 
 # Include directories
 include_directories(
