@@ -1,10 +1,14 @@
 #include <iostream>
 #include <inspireface.h>
 
-int main() {
+int main(int argc, char* argv[]){
+    if (argc < 2) {
+        std::cerr << "Usage: ./demo <model_path>" << std::endl;
+        return 1;
+    }
     std::cout << "[SUCCESS] THE BINARY STARTED WITHOUT OPENCV CONFLICTS!" << std::endl;
     
-    HPath packPath = "/kaggle/temp/InspireFace/test_res/pack/Megatron_TRT";
+    HPath packPath = argv[1];
     std::cout << "[DEBUG] Attempting to Launch SDK..." << std::endl;
     
     HResult ret = HFLaunchInspireFace(packPath);

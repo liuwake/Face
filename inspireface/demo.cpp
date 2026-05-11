@@ -6,9 +6,13 @@
 
 
 
-int main(){
+int main(int argc, char* argv[]){
+    if (argc < 3) {
+        std::cerr << "Usage: ./demo <model_path> <image_path>" << std::endl;
+        return 1;
+    }
     HResult ret;
-    HPath packPath = "selected_model";
+    HPath packPath = argv[1];
     ret = HFLaunchInspireFace(packPath);
     if (ret != HSUCCEED) {
         HFLogPrint(HF_LOG_ERROR, "Load Resource error: %d", ret);                             
@@ -31,7 +35,7 @@ int main(){
 
 
     HFImageBitmap image;
-    HPath sourcePath = "selected_img";
+    HPath sourcePath = argv[2];
     ret = HFCreateImageBitmapFromFilePath(sourcePath, 3, &image);
     if (ret != HSUCCEED) {
         HFLogPrint(HF_LOG_ERROR, "The source entered is not a picture or read error.");
@@ -73,7 +77,7 @@ int main(){
     std::cout<<multipleFaceData.rects->height<<std::endl;
     std::cout<<multipleFaceData.angles.roll<<std::endl;
 
-    cv::Mat img = cv::imread("selected_img");
+    cv::Mat img = cv::imread(sourcePath);
     cv::Rect rect;
     rect.height = multipleFaceData.rects->height;
     rect.width = multipleFaceData.rects->width;
