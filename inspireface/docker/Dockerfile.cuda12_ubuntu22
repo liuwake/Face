@@ -6,17 +6,22 @@ ARG http_proxy
 ARG all_proxy
 ARG ALL_PROXY
 
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+
 RUN apt-get update 
 
 # Update the package list and install basic development tools
-RUN apt-get install -y --no-install-recommends build-essential
-RUN apt-get install -y --no-install-recommends software-properties-common
-RUN apt-get install -y --no-install-recommends curl
-RUN apt-get install -y --no-install-recommends wget
-RUN apt-get install -y --no-install-recommends libopencv-dev
-
-# Install CMake
-RUN apt-get install -y --no-install-recommends
+RUN apt-get install -y --no-install-recommends tzdata && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+RUN apt-get install -y --no-install-recommends \
+    build-essential \
+    software-properties-common \
+    curl \
+    wget \
+    libopencv-dev
+ENV DEBIAN_FRONTEND=dialog
 
 # Install CMake 3.20.6
 RUN cd /opt && \

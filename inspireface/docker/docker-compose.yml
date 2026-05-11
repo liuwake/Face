@@ -3,16 +3,16 @@ services:
   build-tensorrt-cuda12-ubuntu22:
     build:
       context: .
-      dockerfile: docker/Dockerfile.cuda12_ubuntu22
+      dockerfile: ./Dockerfile.cuda12_ubuntu22
     environment:
       - VERSION=${VERSION}
       - CUDA_TAG=cuda12.2_ubuntu22.04
-      # - ALL_PROXY=http://192.168.1.41:7890
+      - ALL_PROXY=http://192.168.1.41:7890
     working_dir: /kaggle
     volumes:
       - /kaggle:/kaggle # Mount the project root directory to the container
     # command: bash command/build_linux_tensorrt.sh
-    command: apt update && apt install libopencv-dev
+    command: nvidia-smi
     deploy:
       resources:
         reservations:
