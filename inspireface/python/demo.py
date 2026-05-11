@@ -2,6 +2,9 @@
 import cv2
 import inspireface as isf
 
+
+isf.launch(model_name="Megatron_TRT")
+
 # Create session with required features enabled
 session = isf.InspireFaceSession(
     # opt=isf.HF_ENABLE_NONE,  # Optional features
