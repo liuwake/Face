@@ -10,10 +10,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Define paths
 set(INSPIRE_FACE_ROOT "/kaggle/temp/InspireFace")
-set(INSPIRE_FACE_BUILD_DIR "${INSPIRE_FACE_ROOT}/build/inspireface-linux-tensorrt-cudaV12540_ubuntu_none")
+file(GLOB INSPIRE_FACE_BUILD_DIRS "${INSPIRE_FACE_ROOT}/build/inspireface-linux-tensorrt-*")
+list(GET INSPIRE_FACE_BUILD_DIRS 0 INSPIRE_FACE_BUILD_DIR)
 set(INSPIRE_FACE_INCLUDE_DIR "${INSPIRE_FACE_BUILD_DIR}/InspireFace/include")
 set(INSPIRE_FACE_LIB_DIR "${INSPIRE_FACE_BUILD_DIR}/InspireFace/lib")
-set(TENSORRT_ROOT "/opt/tensorrt" CACHE PATH "Path to TensorRT installation")
+set(TENSORRT_ROOT "$ENV{TENSORRT_ROOT}" CACHE PATH "Path to TensorRT installation")
 
 # Include directories
 include_directories(
@@ -44,13 +45,13 @@ find_library(TENSORRT_LIBRARY_RUNTIME nvinfer_plugin
 include_directories(${TENSORRT_INCLUDE_DIR})
 
 # Add trt executable
-add_executable(trt ../trt_load.cpp)
+add_executable(trt_load ../trt_load.cpp)
 
 # Define TensorRT macro
-target_compile_definitions(trt PRIVATE ISF_ENABLE_TENSORRT)
+target_compile_definitions(trt_load PRIVATE ISF_ENABLE_TENSORRT)
 
 # Link libraries
-target_link_libraries(trt
+target_link_libraries(trt_load
     # ${OpenCV_LIBS}
     InspireFace
     ${TENSORRT_LIBRARY_INFER}

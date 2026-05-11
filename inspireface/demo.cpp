@@ -1,26 +1,36 @@
 #include <iostream>
-#include <inspireface.h>
+
 #include <opencv2/opencv.hpp>
+
+#include <inspireface.h>
 #include <herror.h>
 
 
 int main(int argc, char* argv[]){
-    if (argc < 3) {
-        std::cerr << "Usage: ./demo <model_path> <image_path>" << std::endl;
+    if (argc < 4) {
+        std::cerr << "Usage: ./demo <model_path> <image_path> <output_path>" << std::endl;
         return 1;
     }
     HResult ret;
+    // The resource file must be loaded before it can be used
     HPath packPath = argv[1];
     ret = HFLaunchInspireFace(packPath);
     if (ret != HSUCCEED) {
         HFLogPrint(HF_LOG_ERROR, "Load Resource error: %d", ret);                             
         return ret;
     }
-    HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
-    HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
 
+// Enable the functions in the pipeline: mask detection, live detection, and face quality
+// detection
+    HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
+// Non-video or frame sequence mode uses IMAGE-MODE, which is always face detection without
+// tracking
+    HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
+// Maximum number of faces detected
     HInt32 maxDetectNum = 20;
+// Face detection image input level
     HInt32 detectPixelLevel = 160;
+// Handle of the current face SDK algorithm context
     HFSession session = {0};
     ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, detectPixelLevel, -1, &session);
     if (ret != HSUCCEED) {
@@ -28,10 +38,11 @@ int main(int argc, char* argv[]){
         return ret;
     }
 
+// Configure some detection parameters
     HFSessionSetTrackPreviewSize(session, detectPixelLevel);
     HFSessionSetFilterMinimumFacePixelSize(session, 4);
 
-
+// Load a image
     HFImageBitmap image;
     HPath sourcePath = argv[2];
     ret = HFCreateImageBitmapFromFilePath(sourcePath, 3, &image);
@@ -39,7 +50,7 @@ int main(int argc, char* argv[]){
         HFLogPrint(HF_LOG_ERROR, "The source entered is not a picture or read error.");
         return ret;
     }
-
+// Prepare an image parameter structure for configuration
     HFImageStream imageHandle = {0};
     HFRotation rotation_enum = HF_CAMERA_ROTATION_0;
     ret = HFCreateImageStreamFromImageBitmap(image, rotation_enum, &imageHandle);
@@ -48,6 +59,7 @@ int main(int argc, char* argv[]){
         return ret;
     }
 
+// Execute HF_FaceContextRunFaceTrack captures face information in an image
     HFMultipleFaceData multipleFaceData = {0};
     ret = HFExecuteFaceTrack(session, imageHandle, &multipleFaceData);
     if (ret != HSUCCEED) {
@@ -55,29 +67,9 @@ int main(int argc, char* argv[]){
         return ret;
     }
 
+// Print the number of faces detected
     auto faceNum = multipleFaceData.detectedNum;
     HFLogPrint(HF_LOG_INFO, "Num of face: %d", faceNum);
-
-
-//    typedef struct HFMultipleFaceData {
-//        HInt32 detectedNum;        ///< Number of faces detected.
-//        PHFaceRect rects;          ///< Array of bounding rectangles for each face.
-//        HPInt32 trackIds;          ///< Array of track IDs for each face.
-//        HPInt32 trackCounts;       ///< Array of track counts for each face.
-//        HPFloat detConfidence;     ///< Array of detection confidence for each face.
-//        HFFaceEulerAngle angles;   ///< Euler angles for each face.
-//        PHFFaceBasicToken tokens;  ///< Tokens associated with each face.
-//    } HFMultipleFaceData, *PHFMultipleFaceData;
-
-    for (int i = 0; i < faceNum; i++) {
-        std::cout << "Face " << i << ": "
-                  << "x=" << multipleFaceData.rects[i].x
-                  << ", y=" << multipleFaceData.rects[i].y
-                  << ", w=" << multipleFaceData.rects[i].width
-                  << ", h=" << multipleFaceData.rects[i].height
-                  << ", roll=" << multipleFaceData.angles.roll[i]
-                  << std::endl;
-    }
 
     cv::Mat img = cv::imread(sourcePath);
     for (int i = 0; i < faceNum; i++) {
@@ -88,8 +80,10 @@ int main(int argc, char* argv[]){
         rect.height = multipleFaceData.rects[i].height;
         cv::rectangle(img, rect, {255, 0, 0}, 2);
     }
-    cv::imwrite("output.jpg", img);
+    cv::imwrite(argv[3], img);
+    HFLogPrint(HF_LOG_INFO, "saved img at %s", argv[3]);
 
+    // The memory must be freed at the end of the program
     ret = HFReleaseImageBitmap(image);
     if (ret != HSUCCEED) {
         HFLogPrint(HF_LOG_ERROR, "Release image bitmap error: %d", ret);
