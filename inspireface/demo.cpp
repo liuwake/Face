@@ -71,19 +71,25 @@ int main(int argc, char* argv[]){
 //        PHFFaceBasicToken tokens;  ///< Tokens associated with each face.
 //    } HFMultipleFaceData, *PHFMultipleFaceData;
 
-    std::cout<<multipleFaceData.rects->x<<std::endl;
-    std::cout<<multipleFaceData.rects->y<<std::endl;
-    std::cout<<multipleFaceData.rects->width<<std::endl;
-    std::cout<<multipleFaceData.rects->height<<std::endl;
-    std::cout<<multipleFaceData.angles.roll<<std::endl;
+    for (int i = 0; i < faceNum; i++) {
+        std::cout << "Face " << i << ": "
+                  << "x=" << multipleFaceData.rects[i].x
+                  << ", y=" << multipleFaceData.rects[i].y
+                  << ", w=" << multipleFaceData.rects[i].width
+                  << ", h=" << multipleFaceData.rects[i].height
+                  << ", roll=" << multipleFaceData.angles.roll[i]
+                  << std::endl;
+    }
 
     cv::Mat img = cv::imread(sourcePath);
-    cv::Rect rect;
-    rect.height = multipleFaceData.rects->height;
-    rect.width = multipleFaceData.rects->width;
-    rect.x = multipleFaceData.rects->x;
-    rect.y = multipleFaceData.rects->y;
-    cv::rectangle(img,rect,{255,0,0},1);
+    for (int i = 0; i < faceNum; i++) {
+        cv::Rect rect;
+        rect.x = multipleFaceData.rects[i].x;
+        rect.y = multipleFaceData.rects[i].y;
+        rect.width = multipleFaceData.rects[i].width;
+        rect.height = multipleFaceData.rects[i].height;
+        cv::rectangle(img, rect, {255, 0, 0}, 2);
+    }
     cv::imwrite("output.jpg", img);
 
     ret = HFReleaseImageBitmap(image);
