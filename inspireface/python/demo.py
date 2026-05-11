@@ -4,7 +4,8 @@ import inspireface as isf
 
 # Create session with required features enabled
 session = isf.InspireFaceSession(
-    opt=isf.HF_ENABLE_NONE,  # Optional features
+    # opt=isf.HF_ENABLE_NONE,  # Optional features
+    param=1,
     detect_mode=isf.HF_DETECT_MODE_ALWAYS_DETECT,  # Detection mode
 )
 
@@ -12,7 +13,9 @@ session = isf.InspireFaceSession(
 session.set_detection_confidence_threshold(0.5)
 
 # Read image
-image = cv2.imread("path/to/your/image.jpg")
+image = cv2.imread(
+    "/kaggle/temp/insightface/python-package/insightface/data/images/t1.jpg"
+)
 assert image is not None, "Please check if the image path is correct"
 
 # Perform face detection
