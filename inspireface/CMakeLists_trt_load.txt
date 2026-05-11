@@ -51,7 +51,7 @@ target_compile_definitions(trt PRIVATE ISF_ENABLE_TENSORRT)
 
 # Link libraries
 target_link_libraries(trt
-    # ${OpenCV_LIBS} # 移除 OpenCV 链接
+    # ${OpenCV_LIBS}
     InspireFace
     ${TENSORRT_LIBRARY_INFER}
     ${TENSORRT_LIBRARY_RUNTIME}
