@@ -3,7 +3,7 @@ from typing import Union
 
 import tensorrt as trt
 
-from if_rest.logger import logger
+from loguru import logger
 
 # Based on code from NVES_R's response at
 # https://forums.developer.nvidia.com/t/segmentation-fault-when-creating-the-trt-builder-in-python-works-fine-with-trtexec/111376
@@ -13,8 +13,10 @@ TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 EXPLICIT_BATCH = 1 << (int)(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
 
 
+from typing import Optional, Sequence
+
 def _build_engine_onnx(input_onnx: Union[str, bytes], force_fp16: bool = False, max_batch_size: int = 1,
-                       max_workspace: int = 1024):
+                       max_workspace: int = 1024, input_shape: Optional[Sequence[int]] = None):
     """
     Builds TensorRT engine from provided ONNX file
 
@@ -23,6 +25,7 @@ def _build_engine_onnx(input_onnx: Union[str, bytes], force_fp16: bool = False, 
         force_fp16 (bool): Force use of FP16 precision, even if device doesn't support it. Be careful.
         max_batch_size (int): Define maximum batch size supported by engine. If >1 creates optimization profile.
         max_workspace (int): Maximum builder workspace in MB.
+        input_shape (Optional[Sequence[int]]): Concrete input shape to replace dynamic dimensions.
 
     Returns:
         TensorRT engine
@@ -59,6 +62,16 @@ def _build_engine_onnx(input_onnx: Union[str, bytes], force_fp16: bool = False, 
         # Get input name and shape for building optimization profile
         input = network.get_input(0)
         inp_shape = list(input.shape)
+        if input_shape is not None:
+            if len(input_shape) != len(inp_shape):
+                raise ValueError('input_shape length must match model input rank')
+            for i, dim in enumerate(inp_shape):
+                if dim <= 0:
+                    inp_shape[i] = input_shape[i]
+        else:
+            for i, dim in enumerate(inp_shape):
+                if dim <= 0:
+                    inp_shape[i] = 1
         inp_shape[0] = 1
         min_opt_shape = tuple(inp_shape)
         inp_shape[0] = max_batch_size
@@ -85,7 +98,7 @@ def check_fp16():
 
 
 def convert_onnx(input_onnx: Union[str, bytes], engine_file_path: str, force_fp16: bool = False,
-                 max_batch_size: int = 1):
+                 max_batch_size: int = 1, input_shape: Optional[Sequence[int]] = None):
     """
     Creates TensorRT engine and serializes it to disk
 
@@ -94,6 +107,7 @@ def convert_onnx(input_onnx: Union[str, bytes], engine_file_path: str, force_fp1
         engine_file_path (str): Path where TensorRT engine should be saved.
         force_fp16 (bool): Force use of FP16 precision, even if device doesn't support it. Be careful.
         max_batch_size (int): Define maximum batch size supported by engine. If >1 creates optimization profile.
+        input_shape (Optional[Sequence[int]]): Concrete input shape to replace dynamic dimensions.
 
     Returns:
         None
@@ -107,7 +121,8 @@ def convert_onnx(input_onnx: Union[str, bytes], engine_file_path: str, force_fp1
         onnx_obj = input_onnx
 
     engine, trt10 = _build_engine_onnx(input_onnx=onnx_obj,
-                                       force_fp16=force_fp16, max_batch_size=max_batch_size)
+                                       force_fp16=force_fp16, max_batch_size=max_batch_size,
+                                       input_shape=input_shape)
 
     assert not isinstance(engine, type(None))
 
@@ -116,3 +131,16 @@ def convert_onnx(input_onnx: Union[str, bytes], engine_file_path: str, force_fp1
             f.write(engine)
         else:
             f.write(engine.serialize())
+
+if __name__ == "__main__":
+    input_onnx_path = '/kaggle/temp/Face/inspireface/tensorrt/scrfd_2.5g_bnkps.onnx'
+    engine_file_path = '/kaggle/temp/Face/inspireface/tensorrt/_00_scrfd_2_5g_bnkps_shape160x160_fp16.engine'
+
+    convert_onnx(
+        input_onnx=input_onnx_path,
+        engine_file_path=engine_file_path,
+        force_fp16=True,
+        input_shape=[1, 3, 160, 160],
+    )
+
+    print(f"{input_onnx_path} -> {engine_file_path}")
