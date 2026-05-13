@@ -1,6 +1,7 @@
 import sys
 from typing import Union
 
+import click
 import tensorrt as trt
 
 from loguru import logger
@@ -124,15 +125,20 @@ def convert_onnx(input_onnx: Union[str, bytes], engine_file_path: str, force_fp1
         else:
             f.write(engine.serialize())
 
-if __name__ == "__main__":
-    input_onnx_path = '/kaggle/temp/Face/inspireface/tensorrt/scrfd_2.5g_bnkps.onnx'
-    engine_file_path = '/kaggle/temp/Face/inspireface/tensorrt/_00_scrfd_2_5g_bnkps_shape160x160_fp16.engine'
-
+@click.command()
+@click.option('--onnx', 'input_onnx_path', required=True, type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True), help='Path to the input ONNX file.')
+@click.option('--engine', 'engine_file_path', required=True, type=click.Path(file_okay=True, dir_okay=False, writable=True), help='Path to save the TensorRT engine file.')
+@click.option('--force_fp16', default=False, help='Force use of FP16 precision.')
+@click.option('--shape', default=160, type=int, show_default=True, help='Height and width for the input shape.')
+def main(input_onnx_path: str, engine_file_path: str, force_fp16: bool, shape: int):
     convert_onnx(
         input_onnx=input_onnx_path,
         engine_file_path=engine_file_path,
-        force_fp16=True,
-        shape=160,
+        force_fp16=force_fp16,
+        shape=shape,
     )
-
     print(f"{input_onnx_path} -> {engine_file_path}")
+
+
+if __name__ == "__main__":
+    main()
